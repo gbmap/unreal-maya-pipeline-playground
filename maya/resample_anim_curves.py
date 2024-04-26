@@ -1,5 +1,7 @@
 """
-Gets the animation curve of a joint and resamples all of its animation curves.
+Gets the animation curve of a joint and resamples all of its animation curves at
+a configurable frames per key interval. Useful for simplifying mixamo animations
+and editing them.
 """
 from abc import ABC, abstractmethod
 from collections import defaultdict
