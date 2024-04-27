@@ -3,6 +3,8 @@ import re
 import os
 from argparse import ArgumentParser
 
+import unreal_utils as uu
+
 def format_animation_filename(name: str, target_preffix: str = 'A_'):
     """
     Maps:
@@ -31,8 +33,7 @@ def import_animations(directory: str, destination_path: str, skeleton_asset: str
         task = unreal.AssetImportTask()
         task.filename = fname
         task.destination_path = destination_path
-        task.destination_name = format_animation_filename(os.path.basename(fname))
-        print(task.destination_name)
+        task.destination_name = uu.format_preffix(os.path.basename(fname), 'A_', 'Aanimation')
 
         task.replace_existing = True
         task.automated = True
