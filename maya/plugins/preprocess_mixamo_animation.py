@@ -24,7 +24,6 @@ class PreprocessMixamoAnimation(om.MPxCommand):
     def isUndoable(self): return True
     def redoIt(self): self.doIt(None)
 
-
     def doIt(self, args):
         self.rename_bones()
         self.add_root_bone()

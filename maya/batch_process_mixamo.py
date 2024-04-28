@@ -18,8 +18,34 @@ def batch_process(source: str, target: str, resample:int) -> None:
     cmds.loadPlugin("preprocess_mixamo_animation.py")
     cmds.loadPlugin("resample_anim_curves.py")
 
-    for file in [os.path.join(source,f) for f in os.listdir(source) if f.endswith('.fbx')]:
-        print(f'[+] processing {file}...')
+
+    mesh_dir = os.path.join(source, 'Mesh')
+    assert os.path.isdir(mesh_dir), "needs a folder called Mesh in source dir"
+
+    mesh_files = [f for f in os.listdir(mesh_dir) if f.endswith('.fbx')]
+    assert len(mesh_files) == 1, "only one mesh file allowed in mesh file"
+
+
+    mesh_file = os.path.join(mesh_dir, mesh_files[0])
+    target_mesh_path = os.path.join(target, 'Mesh', os.path.basename(mesh_file))
+    os.makedirs(os.path.dirname(target_mesh_path), exist_ok=True)
+
+    print(f'[+] processing mesh: {mesh_file}')
+    cmds.currentUnit(t='ntsc')
+    cmds.file(mesh_file, i=True, type='Fbx', itr='override')
+    cmds.mixamo_rename()
+
+
+    export(target_mesh_path)
+    cmds.file(f=True, new=True)
+
+    target_anim_folder = os.path.join(target, 'Anims')
+    os.makedirs(target_anim_folder, exist_ok=True)
+
+    anim_src_dir = os.path.join(source, 'Anims')
+    files = [os.path.join(anim_src_dir,f) for f in os.listdir(anim_src_dir) if f.endswith('.fbx')]
+    for file in files:
+        print(f'[+] processing animation: {file}...')
 
         print('\timporting')
         cmds.currentUnit(t='ntsc')
@@ -31,8 +57,10 @@ def batch_process(source: str, target: str, resample:int) -> None:
         print('\tresampling anim curves')
         cmds.resample_anim_curves_all(n=resample)
 
+        target_anim_path = os.path.join(target_anim_folder, os.path.basename(file))
         print(f'\texporting to {target}')
-        export(os.path.join(target, os.path.basename(file)))
+
+        export(target_anim_path)
 
         cmds.file(f=True, new=True)
 

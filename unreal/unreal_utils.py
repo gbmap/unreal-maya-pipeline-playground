@@ -1,4 +1,5 @@
 import re
+from collections import defaultdict
 from functools import partial
 
 
@@ -37,6 +38,7 @@ def format_suffix(name: str, target_suffix: str, suffix_capture: str) -> str:
 
 
 def format_default_asset(basename: str, asset_name: str) -> str:
+    final_name = remove_file_ext(asset_name)
     final_name = remove_preffix(asset_name, basename)
     final_name = remove_repeated_chars(asset_name, '_')
     final_name = format_preffix(final_name, f'{basename}_', basename)
@@ -70,10 +72,17 @@ def _format_asset_name(basename: str, name: str, target_preffix: str, preffix_ca
     final_name = format_default_asset(basename, final_name)
     return format_preffix(final_name, target_preffix, preffix_capture).replace(' ', '_')
 
-ASSET_RENAME_FN_LOOKUP = {t[0]: partial(_format_asset_name, target_preffix=t[1], preffix_capture=t[2]) for t in [
+
+ASSET_RENAME_FN_LOOKUP = defaultdict(lambda: format_default_asset)
+for t in [
     ('Material', 'M_', 'material'),
     ('Skeleton', 'Sk_', 'skeleton'),
     ('SkeletalMesh', 'SkMsh_', 'mesh'),
-    ('PhysicsAsset', 'Phys_', 'physicsasset')
-]}
+    ('PhysicsAsset', 'Phys_', 'physicsasset'),
+    ('Animation', 'A_', 'animation')
+]:
+    ASSET_RENAME_FN_LOOKUP[t[0]] = partial(_format_asset_name, target_preffix=t[1], preffix_capture=t[2])
 ASSET_RENAME_FN_LOOKUP['Texture2D'] = format_texture_name
+
+def format_asset_name(asset: str, asset_type: str, basename: str) -> str:
+    return ASSET_RENAME_FN_LOOKUP.get(asset_type)(basename, asset)
